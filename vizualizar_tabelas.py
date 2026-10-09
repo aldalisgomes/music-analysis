@@ -30,6 +30,4 @@ colunas_1_2_3_musicas = df_musicas.iloc[:, [0, 1, 2]]
 # 3. Seleciona apenas a 1ª e 2ª coluna (índices 0 e 1) da aba "Artistas"
 colunas_1_2_artistas = df_artistas.iloc[:, [0, 1]]
 
-# Exibe o resultado
-print(colunas_1_2_3.head(20))
 # %%

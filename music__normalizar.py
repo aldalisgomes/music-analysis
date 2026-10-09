@@ -1,4 +1,5 @@
 import csv
+import datetime
 from pathlib import Path
 
 from openpyxl import load_workbook, Workbook
@@ -103,6 +104,8 @@ linhas_csv = [str(c[0]) for c in ws_origem.iter_rows(min_col=1, max_col=1, value
 origem_wb.close()
 
 cabecalho = next(csv.reader([linhas_csv[0]]))
+# Remover "_%" dos nomes das colunas
+cabecalho = [col.replace("_%", "") for col in cabecalho]
 dados = []
 for numero_linha, texto in enumerate(linhas_csv[1:], start=2):
     linha = next(csv.reader([texto]))
@@ -120,6 +123,8 @@ colunas_musicas = ["musica_id"] + [
     coluna for coluna in cabecalho
     if coluna not in {"artist(s)_name", "artist_count"}
 ]
+# Adicionar a coluna de data
+colunas_musicas.append("release_date")
 
 musicas = []
 artistas = []
@@ -127,10 +132,26 @@ relacoes = []
 ids_artistas = {}
 
 for musica_id, registro in enumerate(dados, start=1):
-    musicas.append([
-        musica_id,
-        *[converter_valor(registro[coluna]) for coluna in colunas_musicas[1:]],
-    ])
+    
+    # Construir a nova linha
+    nova_linha_musica = [musica_id]
+    
+    for coluna in colunas_musicas[1:-1]: # Pula 'musica_id' e 'release_date'
+         nova_linha_musica.append(converter_valor(registro[coluna]))
+         
+    # Criar a coluna de data
+    try:
+        ano = int(registro.get("released_year", 0))
+        mes = int(registro.get("released_month", 0))
+        dia = int(registro.get("released_day", 0))
+        data_lancamento = datetime.date(ano, mes, dia).strftime("%d-%m-%Y")
+    except ValueError:
+         data_lancamento = None
+
+    nova_linha_musica.append(data_lancamento)
+
+    musicas.append(nova_linha_musica)
+
 
     texto_artistas = registro["artist(s)_name"].replace(
         "Tyler, The Creator", "Tyler_The Creator"
