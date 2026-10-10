@@ -57,8 +57,11 @@ def converter_valor(valor):
     valor = valor.strip()
     if not valor or valor.lower() in {"nan", "none", "null"}:
         return None
+    
+    valor_sem_virgula = valor.replace(",", "")
+    
     try:
-        numero = float(valor)
+        numero = float(valor_sem_virgula)
         return int(numero) if numero.is_integer() else numero
     except ValueError:
         return valor
@@ -137,14 +140,18 @@ for musica_id, registro in enumerate(dados, start=1):
     nova_linha_musica = [musica_id]
     
     for coluna in colunas_musicas[1:-1]: # Pula 'musica_id' e 'release_date'
-         nova_linha_musica.append(converter_valor(registro[coluna]))
+         # Apaga o valor da coluna 'streams' especificamente para o musica_id 575
+         if musica_id == 575 and coluna == "streams":
+             nova_linha_musica.append(None)
+         else:
+             nova_linha_musica.append(converter_valor(registro[coluna]))
          
     # Criar a coluna de data
     try:
         ano = int(registro.get("released_year", 0))
         mes = int(registro.get("released_month", 0))
         dia = int(registro.get("released_day", 0))
-        data_lancamento = datetime.date(ano, mes, dia).strftime("%d-%m-%Y")
+        data_lancamento = datetime.date(ano, mes, dia).strftime("%Y-%m-%d")
     except ValueError:
          data_lancamento = None
 
