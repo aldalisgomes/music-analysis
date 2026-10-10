@@ -1,0 +1,17 @@
+# Ambiente Virtual
+venv/
+env/
+.env
+
+# Arquivos compilados do Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Arquivos de dados gerados/processados 
+# (Evita subir planilhas pesadas ou dados sensíveis para o repositório)
+music_normalizado.xlsx
+music_normalizado_*.xlsx
+
+# Opcional: Descomente a linha abaixo se não quiser versionar a planilha original
+# music*.xlsx
