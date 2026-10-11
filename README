@@ -5,9 +5,9 @@ This project implements an end-to-end ETL (Extract, Transform, Load) pipeline us
 
 ## Prerequisites
 * Windows Subsystem for Linux (WSL) with Ubuntu, or Git Bash.
-* Docker and Docker Compose installed.
+* Docker and Docker Compose installed **and currently running in the background** (e.g., make sure Docker Desktop is open).
 * Python 3.11+.
-* VS Code.
+* *(Optional)* VS Code or any other text editor to view the project files.
 
 ## How to Run
 
@@ -29,6 +29,12 @@ source venv/bin/activate
 ```bash
 pip install -r requirements.txt
 make all
+```
+
+### 4. Run Analytical Queries
+```bash
+docker cp consultas.sql sqlserver_db:/consultas.sql
+docker exec sqlserver_db /opt/mssql-tools18/bin/sqlcmd -S 127.0.0.1 -U sa -P SuaSenhaForte123 -C -d SpotifyDB -W -i /consultas.sql
 ```
 
 (Note: To clean the environment, cache, and the generated resultados folder, you can run make clean)
