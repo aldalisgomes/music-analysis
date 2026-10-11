@@ -1,0 +1,59 @@
+# Music Analysis - ETL Pipeline
+
+## Project Overview
+This project implements an end-to-end ETL (Extract, Transform, Load) pipeline using Python, Docker, and SQL Server. It normalizes a Spotify dataset (1NF to 3NF) and loads it into a containerized database.
+
+## Prerequisites
+* Windows Subsystem for Linux (WSL) with Ubuntu, or Git Bash.
+* Docker and Docker Compose installed.
+* Python 3.11+.
+* VS Code.
+
+## How to Run
+
+Note for Windows Users: The Makefile commands are designed for Unix environments (Linux/macOS). If you are on Windows, please use Git Bash or WSL to run the pipeline. The script is fully configured to automatically open the generated visualization on your Windows screen even if running from WSL.
+
+### 1. Clone the repository and access the folder
+```bash
+git clone https://github.com/aldalisgomes/music-analysis.git
+cd music-analysis
+```
+
+### 2. Create and activate the virtual environment (Required on newer Debian/Ubuntu-based systems, such as WSL)
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+### 3. Install dependencies and run the pipeline
+```bash
+pip install -r requirements.txt
+make all
+```
+
+(Note: To clean the environment, cache, and the generated resultados folder, you can run make clean)
+*Note for this specific project: Use `make down` to clean Docker containers and volumes.*
+
+## Alternative for Windows (Or No Make Installed)
+
+If you are using standard Git Bash, PowerShell, or Command Prompt without make installed, you can simply run the Python script directly after activating your virtual environment:
+
+First, start the database and initialize the tables:
+```bash
+docker-compose up -d
+docker cp setup.sql sqlserver_db:/setup.sql
+docker exec sqlserver_db /opt/mssql-tools18/bin/sqlcmd -S 127.0.0.1 -U sa -P SuaSenhaForte123 -C -Q "CREATE DATABASE SpotifyDB;"
+docker exec sqlserver_db /opt/mssql-tools18/bin/sqlcmd -S 127.0.0.1 -U sa -P SuaSenhaForte123 -C -i /setup.sql
+```
+
+Then, build the Python image and run the ETL script inside the Docker network:
+```bash
+docker build -t spotify-etl .
+docker run --rm --network $(docker inspect -f '{{range .NetworkSettings.Networks}}{{.NetworkID}}{{end}}' sqlserver_db) spotify-etl
+```
+
+## Running Analytical Queries
+After the data is loaded, you can execute the analytical queries:
+```bash
+docker cp consultas.sql sqlserver_db:/consultas.sql
+docker exec sqlserver_db /opt/mssql-tools18/bin/sqlcmd -S 127.0.0.1 -U sa -P SuaSenhaForte123 -C -d SpotifyDB -W -i /consultas.sql
